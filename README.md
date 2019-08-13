@@ -1,4 +1,5 @@
 snake_pygame
 
-Finished todays work
-There is a huge mathematic mistake, but I can fix this later.
+Tried to fix the math problem.
+Everything works fine until it collided with food or itself.
+Need help
