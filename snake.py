@@ -5,11 +5,11 @@ import time
 import sys
 
 step = 44
-player_img = "player.png"
+snake_img = "player.png"
 food_img = "food.png"
 
 
-class Player:
+class Snake:
     # snake controlling
     x = [0]
     y = [0]
@@ -61,9 +61,9 @@ class Player:
         self.direction = 3
 
     # get pixel and displays the player image on background
-    def draw(self, background, __player_img):
+    def draw(self, background, __snake_img):
         for i in range(self.length):
-            background.blit(__player_img, (self.x[i], self.y[i]))
+            background.blit(__snake_img, (self.x[i], self.y[i]))
 
 
 class Food:
@@ -82,36 +82,29 @@ class Food:
 class Collision:
     # get collision with snake and food
     # noinspection PyMethodMayBeStatic
-    def is_collision(self, x_food, y_food, x_player, y_player, bsize):
-        if x_food <= x_player <= x_player + bsize:
-            if y_food <= y_player <= y_player + bsize:
-                print("collided at: " + str(x_player) + " / " + str(y_player))
+    def is_collision(self, x_object, y_object, x_target, y_target, tol_size):
+        if x_object <= x_target <= x_target + tol_size:
+            if y_object <= y_target <= y_target + tol_size:
+                print("collided at: " + str(x_target) + " / " + str(y_target))
                 return True
         return False
-
-
-class DisplayText:
-    def __init__(self, text, screen):
-        font = pygame.font.SysFont("Arial", 30)
-        text_bg = font.render(text, False, (0, 0, 0))
-        screen.blit(text_bg, (0, 0))
 
 
 class Game:
     # set up the desktop environment
     window_width = 800
     window_height = 600
-    player = 0
-    food = 0
+    _snake = 0
+    _food = 0
 
     def __init__(self):
         self._running = True
         self._display_ = None
         self._player_img_ = None
         self._food_img_ = None
-        self.collision = Collision()
-        self.player = Player(1)
-        self.food = Food(5, randint(3, 10))
+        self._collision = Collision()
+        self._snake = Snake(1)
+        self._food = Food(5, 5)
 
     def on_init(self):
         pygame.init()
@@ -123,30 +116,29 @@ class Game:
         self._running = True
 
         # loads assets
-        self._player_img_ = pygame.image.load(player_img).convert()
+        self._player_img_ = pygame.image.load(snake_img).convert()
         self._food_img_ = pygame.image.load(food_img).convert()
 
     def on_loop(self):
-        self.player.update()
+        self._snake.update()
         # get collision
-        for i in range(0, self.player.length):
-            if self.collision.is_collision(self.food.x, self.food.y, self.player.x[i], self.player.y[i], step):
-                self.food.x = randint(2, 9) * step
-                self.food.y = randint(2, 9) * step
-                self.player.length += 1
+        for i in range(0, self._snake.length):
+            if self._collision.is_collision(self._food.x, self._food.y, self._snake.x[i], self._snake.y[i], step):
+                self._food.x = randint(2, 9) * step
+                self._food.y = randint(2, 9) * step
+                self._snake.length += 1
 
-        for k in range(2, self.player.length):
-            if self.collision.is_collision(self.player.x[0], self.player.y[0], self.player.x[k], self.player.y[k], 40):
-                # Here I want to add a text box with DisplayText("Lost at: Player Length", screen)
-                print("Lost at: " + str(self.player.length))
-                time.sleep(2)
+        for k in range(2, self._snake.length):
+            if self._collision.is_collision(self._snake.x[0], self._snake.y[0], self._snake.x[k], self._snake.y[k], 40):
+                # Here I want to add a text box with DisplayText("Lost at: Snake Length", screen)
+                print("Lost at: " + str(self._snake.length))
                 self.on_cleanup()
         pass
 
     def on_render(self):
         self._display_.fill((0, 0, 0))
-        self.player.draw(self._display_, self._player_img_)
-        self.food.draw(self._display_, self._food_img_)
+        self._snake.draw(self._display_, self._player_img_)
+        self._food.draw(self._display_, self._food_img_)
         pygame.display.flip()
 
     # noinspection PyMethodMayBeStatic
@@ -165,13 +157,13 @@ class Game:
             event = pygame.event.wait()
 
             if keys[K_RIGHT]:
-                self.player.move_right()
+                self._snake.move_right()
             if keys[K_LEFT]:
-                self.player.move_left()
+                self._snake.move_left()
             if keys[K_UP]:
-                self.player.move_up()
+                self._snake.move_up()
             if keys[K_DOWN]:
-                self.player.move_down()
+                self._snake.move_down()
             if keys[K_ESCAPE]:
                 self._running = False
             if event.type == pygame.QUIT:
